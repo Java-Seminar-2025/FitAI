@@ -11,7 +11,7 @@ The application is developed using **Java and Spring Boot**.
 ## 🚀 List of Features
 
 ### 1. User Authentication and Profile
-User registration and login with the ability to manage **personal information and fitness preferences**.
+User registration and login with the ability to manage **personal information** and **fitness preferences**.
 
 ### 2. AI Gym Equipment Scanner
 Allows users to upload a **photo of gym equipment** and receive AI-generated information about:
