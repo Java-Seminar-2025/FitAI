@@ -46,4 +46,4 @@ Optimized for **desktop computers, tablets, and mobile browsers**.
 - **Web Development:** Java Web Programming
 - **API Communication:** REST API
 - **Core Concepts:** Object-Oriented Programming, Java I/O, Collections, Interfaces and Exception Handling
-- **Databse: H2
+- **Databse**: H2
