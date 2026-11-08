@@ -1,4 +1,4 @@
-package com.fitai.fitai;
+package com.fitai.fitai.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

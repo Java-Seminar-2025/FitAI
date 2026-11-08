@@ -1,5 +1,9 @@
-package com.fitai.fitai;
+package com.fitai.fitai.controller;
 import org.springframework.web.bind.annotation.*;
+
+import com.fitai.fitai.model.Exercise;
+import com.fitai.fitai.repository.ExerciseRepository;
+
 import java.util.List;
 
 @RestController
