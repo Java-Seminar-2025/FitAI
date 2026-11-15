@@ -1,16 +1,16 @@
 package com.fitai.fitai.model;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 @Entity
-@Getter
-@Setter
+@Table(name="exercises")
+@Data
 public class Exercise {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String name;
     private String muscleGroup;
+    @Column(length=1000)
     private String description;
     private String equipment;
 }
