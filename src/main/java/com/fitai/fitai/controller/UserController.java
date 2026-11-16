@@ -1,31 +1,64 @@
 package com.fitai.fitai.controller;
 
-import com.fitai.fitai.model.User;
-import com.fitai.fitai.repository.UserRepository;
+import com.fitai.fitai.dto.UpdateUserRequest;
+import com.fitai.fitai.dto.UserResponse;
+import com.fitai.fitai.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
-@RestController 
-@RequestMapping("api/users")
+@RestController
+@RequestMapping("/api/users")
 public class UserController {
-    
-    private final UserRepository userRepository;
 
-    // prik ovoga Spring automatski ubacuje (inject) repozitorij
-    public UserController(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+   private final UserService userService;
 
-    // vraća listu svih korisnika
-    @GetMapping
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
+   public UserController(UserService userService) {
+      this.userService = userService;
+   }
 
-    // sprema novog korisnika u bazu
-    @PostMapping
-    public User createUser(@RequestBody User user) {
-        return userRepository.save(user);
-    }
+
+   @GetMapping("/me")
+   public UserResponse me(Principal principal) {
+      return userService.getByUsername(principal.getName());
+   }
+
+   @PutMapping("/me")
+   public UserResponse updateMe(Principal principal, @Valid @RequestBody UpdateUserRequest request) {
+      return userService.updateByUsername(principal.getName(), request);
+   }
+
+   @DeleteMapping("/me")
+   public ResponseEntity<Void> deleteMe(Principal principal, HttpServletRequest request) {
+      userService.deleteByUsername(principal.getName());
+      HttpSession session = request.getSession(false);
+      if (session != null) {
+         session.invalidate();
+      }
+      SecurityContextHolder.clearContext();
+      return ResponseEntity.noContent().build();
+   }
+
+   // admin only
+   @GetMapping
+   public List<UserResponse> getAll() {
+      return userService.getAll();
+   }
+
+   @GetMapping("/{id}")
+   public UserResponse getById(@PathVariable Integer id) {
+      return userService.getById(id);
+   }
+
+   @DeleteMapping("/{id}")
+   public ResponseEntity<Void> delete(@PathVariable Integer id) {
+      userService.deleteById(id);
+      return ResponseEntity.noContent().build();
+   }
 }
