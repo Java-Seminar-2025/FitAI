@@ -28,6 +28,10 @@ public class SecurityConfig {
                       .requestMatchers(PathRequest.toH2Console()).permitAll() // samo za razvoj!
                       .requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login").permitAll()
                       .requestMatchers("/api/users/me").authenticated()
+                      // svaki prijavljeni korisnik smije pozvati PUT/DELETE, a servis provjerava je li vlasnik
+                      .requestMatchers(HttpMethod.PUT, "/api/users/*").authenticated()
+                      .requestMatchers(HttpMethod.DELETE, "/api/users/*").authenticated()
+                      // popis svih korisnika i dohvat tuđeg računa samo za ADMIN
                       .requestMatchers("/api/users", "/api/users/**").hasRole("ADMIN")
                       .anyRequest().authenticated())
               .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))

@@ -7,10 +7,12 @@ import com.fitai.fitai.exception.DuplicateResourceException;
 import com.fitai.fitai.exception.ResourceNotFoundException;
 import com.fitai.fitai.model.User;
 import com.fitai.fitai.repository.UserRepository;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -41,8 +43,8 @@ public class UserService {
       return userRepository.findAll().stream().map(this::toResponse).toList();
    }
 
-   public UserResponse getById(Integer id) {
-      return toResponse(findById(id));
+   public UserResponse getByUuid(UUID uuid) {
+      return toResponse(findByUuid(uuid));
    }
 
    public UserResponse getByUsername(String username) {
@@ -50,8 +52,26 @@ public class UserService {
    }
 
    public UserResponse updateByUsername(String username, UpdateUserRequest request) {
-      User user = findByUsername(username);
+      return updateUser(findByUsername(username), request);
+   }
 
+   public UserResponse updateByUuid(UUID uuid, UpdateUserRequest request, String currentUsername) {
+      User user = findByUuid(uuid);
+      checkOwner(user, currentUsername);
+      return updateUser(user, request);
+   }
+
+   public void deleteByUsername(String username) {
+      userRepository.delete(findByUsername(username));
+   }
+
+   public void deleteByUuid(UUID uuid, String currentUsername) {
+      User user = findByUuid(uuid);
+      checkOwner(user, currentUsername);
+      userRepository.delete(user);
+   }
+
+   private UserResponse updateUser(User user, UpdateUserRequest request) {
       if (request.email() != null && !request.email().isBlank()
               && !request.email().equals(user.getEmail())) {
          if (userRepository.existsByEmail(request.email())) {
@@ -65,17 +85,15 @@ public class UserService {
       return toResponse(userRepository.save(user));
    }
 
-   public void deleteById(Integer id) {
-      userRepository.delete(findById(id));
+   private void checkOwner(User user, String currentUsername) {
+      if (!user.getUsername().equals(currentUsername)) {
+         throw new AccessDeniedException("You can only modify your own account");
+      }
    }
 
-   public void deleteByUsername(String username) {
-      userRepository.delete(findByUsername(username));
-   }
-
-   private User findById(Integer id) {
-      return userRepository.findById(id)
-              .orElseThrow(() -> new ResourceNotFoundException("User not found: " + id));
+   private User findByUuid(UUID uuid) {
+      return userRepository.findByUuid(uuid)
+              .orElseThrow(() -> new ResourceNotFoundException("User not found: " + uuid));
    }
 
    private User findByUsername(String username) {
@@ -84,6 +102,6 @@ public class UserService {
    }
 
    private UserResponse toResponse(User u) {
-      return new UserResponse(u.getId(), u.getUsername(), u.getEmail(), u.getRole(), u.getCreatedAt());
+      return new UserResponse(u.getUuid(), u.getUsername(), u.getEmail(), u.getRole(), u.getCreatedAt());
    }
 }

@@ -1,9 +1,10 @@
 package com.fitai.fitai.dto;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public record UserResponse(
-        Integer id,
+        UUID uuid,
         String username,
         String email,
         String role,

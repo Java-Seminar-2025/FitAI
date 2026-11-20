@@ -8,11 +8,14 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.UUID;
 
+@Validated
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -22,7 +25,6 @@ public class UserController {
    public UserController(UserService userService) {
       this.userService = userService;
    }
-
 
    @GetMapping("/me")
    public UserResponse me(Principal principal) {
@@ -37,11 +39,7 @@ public class UserController {
    @DeleteMapping("/me")
    public ResponseEntity<Void> deleteMe(Principal principal, HttpServletRequest request) {
       userService.deleteByUsername(principal.getName());
-      HttpSession session = request.getSession(false);
-      if (session != null) {
-         session.invalidate();
-      }
-      SecurityContextHolder.clearContext();
+      invalidateSession(request);
       return ResponseEntity.noContent().build();
    }
 
@@ -51,14 +49,32 @@ public class UserController {
       return userService.getAll();
    }
 
-   @GetMapping("/{id}")
-   public UserResponse getById(@PathVariable Integer id) {
-      return userService.getById(id);
+   @GetMapping("/{uuid}")
+   public UserResponse getByUuid(@PathVariable UUID uuid) {
+      return userService.getByUuid(uuid);
    }
 
-   @DeleteMapping("/{id}")
-   public ResponseEntity<Void> delete(@PathVariable Integer id) {
-      userService.deleteById(id);
+   @PutMapping("/{uuid}")
+   public UserResponse update(@PathVariable UUID uuid,
+                              @Valid @RequestBody UpdateUserRequest request,
+                              Principal principal) {
+      return userService.updateByUuid(uuid, request, principal.getName());
+   }
+
+   @DeleteMapping("/{uuid}")
+   public ResponseEntity<Void> delete(@PathVariable UUID uuid,
+                                      Principal principal,
+                                      HttpServletRequest request) {
+      userService.deleteByUuid(uuid, principal.getName());
+      invalidateSession(request);
       return ResponseEntity.noContent().build();
+   }
+
+   private void invalidateSession(HttpServletRequest request) {
+      HttpSession session = request.getSession(false);
+      if (session != null) {
+         session.invalidate();
+      }
+      SecurityContextHolder.clearContext();
    }
 }
