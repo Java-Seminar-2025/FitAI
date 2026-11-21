@@ -28,6 +28,7 @@ public class SecurityConfig {
                       .requestMatchers(PathRequest.toH2Console()).permitAll()
                       .requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login").permitAll()
                       .requestMatchers("/api/users/me").authenticated()
+                      .requestMatchers("/","/css/**","/js/**","/images/**").permitAll()
                       .requestMatchers(HttpMethod.PUT, "/api/users/*").authenticated()
                       .requestMatchers(HttpMethod.DELETE, "/api/users/*").authenticated()
                       .requestMatchers("/api/users", "/api/users/**").hasRole("ADMIN")

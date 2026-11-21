@@ -1,0 +1,80 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${appName}">FitAI</title>
+</head>
+<body>
+<h1 th:text="${appName}">FitAI</h1>
+<div id="status"></div>
+<h2>Login</h2>
+<form id="loginForm">
+    <div>
+        <label for="loginUsername">Username:</label>
+        <input type="text" id="loginUsername" name="username" required>
+    </div>
+    <div>
+        <label for="loginPassword">Password: </label>
+        <input type="password" id="loginPassword" name="password" required>
+    </div>
+    <button type="submit">Login</button>
+</form>
+
+<h2>Register</h2>
+<form id="registerForm">
+    <div>
+        <label for="registerUsername">Username:</label>
+        <input type="text" id="registerUsername" name="username" required>
+    </div>
+    <div>
+        <label for="registerEmail">Email:</label>
+        <input type="email" id="registerEmail" name="email" required>
+    </div>
+    <div>
+        <label for="registerPassword">Password:</label>
+        <input type="password" id="registerPassword" name="password" required>
+    </div>
+    <button type="submit">Register</button>
+</form>
+<script>
+    const statusEl=document.getElementById("status");
+    document.getElementById("loginForm").addEventListener("submit",async (e)=>{
+        e.preventDefault();
+        const payload={
+            username: document.getElementById("loginUsername").value,
+            password: document.getElementById("loginPassword").value
+        };
+        const res=await fetch("/api/auth/login",{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body: JSON.stringify(payload)
+        });
+        if (res.ok){
+            statusEl.textContent="Login successful";
+        }else{
+            statusEl.textContent="Login failure: "+res.status;
+        }
+    });
+    document.getElementById("registerForm").addEventListener("submit",async (e)=> {
+        e.preventDefault();
+        const payload = {
+            username: document.getElementById("registerUsername").value,
+            email: document.getElementById("registerEmail").value,
+            password: document.getElementById("registerPassword").value
+        };
+        const res=await fetch("/api/auth/register",{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body: JSON.stringify(payload)
+        });
+        if (res.ok){
+            statusEl.textContent="Register successful";
+        }else{
+            statusEl.textContent="Register failure: "+res.status;
+        }
+
+    });
+
+</script>
+</body>
+</html>

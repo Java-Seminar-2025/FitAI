@@ -43,7 +43,6 @@ public class AuthController {
       Authentication authentication = authenticationManager.authenticate(
               new UsernamePasswordAuthenticationToken(request.username(), request.password()));
 
-      // spremi prijavu u sesiju (da sljedeći zahtjevi s cookie-jem budu prijavljeni)
       SecurityContext context = SecurityContextHolder.createEmptyContext();
       context.setAuthentication(authentication);
       SecurityContextHolder.setContext(context);
