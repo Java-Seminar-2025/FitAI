@@ -22,16 +22,14 @@ public class SecurityConfig {
    @Bean
    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
       http
-              .csrf(csrf -> csrf.disable())                              // REST API, testiranje kroz Postman
-              .headers(h -> h.frameOptions(f -> f.sameOrigin()))         // da radi H2 konzola
+              .csrf(csrf -> csrf.disable())
+              .headers(h -> h.frameOptions(f -> f.sameOrigin()))
               .authorizeHttpRequests(auth -> auth
-                      .requestMatchers(PathRequest.toH2Console()).permitAll() // samo za razvoj!
+                      .requestMatchers(PathRequest.toH2Console()).permitAll()
                       .requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login").permitAll()
                       .requestMatchers("/api/users/me").authenticated()
-                      // svaki prijavljeni korisnik smije pozvati PUT/DELETE, a servis provjerava je li vlasnik
                       .requestMatchers(HttpMethod.PUT, "/api/users/*").authenticated()
                       .requestMatchers(HttpMethod.DELETE, "/api/users/*").authenticated()
-                      // popis svih korisnika i dohvat tuđeg računa samo za ADMIN
                       .requestMatchers("/api/users", "/api/users/**").hasRole("ADMIN")
                       .anyRequest().authenticated())
               .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))

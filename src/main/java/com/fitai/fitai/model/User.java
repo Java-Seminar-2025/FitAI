@@ -28,7 +28,6 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    // can be "USER" or "ADMIN"
     @Column(nullable = false)
     private String role = "USER";
 
