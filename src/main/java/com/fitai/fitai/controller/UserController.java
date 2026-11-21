@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -57,16 +58,20 @@ public class UserController {
    @PutMapping("/{uuid}")
    public UserResponse update(@PathVariable UUID uuid,
                               @Valid @RequestBody UpdateUserRequest request,
-                              Principal principal) {
-      return userService.updateByUuid(uuid, request, principal.getName());
+                              Authentication authentication) {
+      return userService.updateByUuid(uuid, request, authentication);
    }
 
    @DeleteMapping("/{uuid}")
    public ResponseEntity<Void> delete(@PathVariable UUID uuid,
-                                      Principal principal,
+                                      Authentication authentication,
                                       HttpServletRequest request) {
-      userService.deleteByUuid(uuid, principal.getName());
-      invalidateSession(request);
+      String currentUsername=authentication.getName();
+      boolean isSelfDelete=userService.getByUuid(uuid).username().equals(currentUsername);
+      userService.deleteByUuid(uuid,authentication);
+      if (isSelfDelete) {
+         invalidateSession(request);
+      }
       return ResponseEntity.noContent().build();
    }
 

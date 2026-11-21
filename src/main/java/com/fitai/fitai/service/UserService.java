@@ -8,6 +8,7 @@ import com.fitai.fitai.exception.ResourceNotFoundException;
 import com.fitai.fitai.model.User;
 import com.fitai.fitai.repository.UserRepository;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -55,9 +56,9 @@ public class UserService {
       return updateUser(findByUsername(username), request);
    }
 
-   public UserResponse updateByUuid(UUID uuid, UpdateUserRequest request, String currentUsername) {
+   public UserResponse updateByUuid(UUID uuid, UpdateUserRequest request, Authentication authentication) {
       User user = findByUuid(uuid);
-      checkOwner(user, currentUsername);
+      checkOwner(user, authentication);
       return updateUser(user, request);
    }
 
@@ -65,9 +66,9 @@ public class UserService {
       userRepository.delete(findByUsername(username));
    }
 
-   public void deleteByUuid(UUID uuid, String currentUsername) {
+   public void deleteByUuid(UUID uuid, Authentication authentication) {
       User user = findByUuid(uuid);
-      checkOwner(user, currentUsername);
+      checkOwner(user, authentication);
       userRepository.delete(user);
    }
 
@@ -85,9 +86,12 @@ public class UserService {
       return toResponse(userRepository.save(user));
    }
 
-   private void checkOwner(User user, String currentUsername) {
-      if (!user.getUsername().equals(currentUsername)) {
-         throw new AccessDeniedException("You can only modify your own account");
+   private void checkOwner(User user, Authentication authentication) {
+      boolean isAdmin=authentication.getAuthorities().stream().anyMatch(
+              auth->auth.getAuthority().equals("ROLE_ADMIN"));
+      boolean isOwner=user.getUsername().equals(authentication.getName());
+      if (!isOwner && !isAdmin){
+         throw new AccessDeniedException("You can only modify your account!");
       }
    }
 
